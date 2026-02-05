@@ -1,0 +1,120 @@
+<div class="dashboard-container">
+  <!-- Header del dashboard -->
+  <div class="dashboard-header">
+    <h2 class="welcome-text">Bienvenido, {{ usuarioNombre }}</h2>
+    <div class="connection-status" [ngClass]="{'connected': !error, 'disconnected': error}">
+      <span class="status-indicator"></span>
+      <span class="status-text">{{ error ? 'Datos de ejemplo' : 'Conectado a BD' }}</span>
+    </div>
+  </div>
+
+  <!-- Tarjetas de estadísticas principales -->
+  <div class="stats-cards">
+    <div class="stat-card blue">
+      <div class="stat-icon">
+        <i class="icon">👥</i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">TOTAL CLIENTES</div>
+        <div class="stat-number">{{ totalClientes || 0 }}</div>
+        <div class="stat-subtitle">Registrados en el sistema</div>
+      </div>
+      <div class="stat-trend">
+        <span class="trend-icon">📈</span>
+        <span class="trend-text">Activos</span>
+      </div>
+    </div>
+
+    <div class="stat-card green">
+      <div class="stat-icon">
+        <i class="icon">✅</i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">CITAS ATENDIDAS</div>
+        <div class="stat-number">{{ citasAtendidas || 0 }}</div>
+        <div class="stat-subtitle">Completadas exitosamente</div>
+      </div>
+      <div class="stat-trend">
+        <span class="trend-icon">✨</span>
+        <span class="trend-text">Hoy</span>
+      </div>
+    </div>
+
+    <div class="stat-card yellow">
+      <div class="stat-icon">
+        <i class="icon">⏰</i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">CITAS PENDIENTES</div>
+        <div class="stat-number">{{ citasPendientes || 0 }}</div>
+        <div class="stat-subtitle">Próxima: {{ getProximaCita() }}</div>
+      </div>
+      <div class="stat-trend">
+        <span class="trend-icon">🕐</span>
+        <span class="trend-text">Programadas</span>
+      </div>
+    </div>
+
+    <div class="stat-card purple">
+      <div class="stat-icon">
+        <i class="icon">💰</i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">INGRESOS HOY</div>
+        <div class="stat-number">{{ formatearPrecio(ingresosHoy || 0) }}</div>
+        <div class="stat-subtitle">Pagos recibidos</div>
+      </div>
+      <div class="stat-trend">
+        <span class="trend-icon">💵</span>
+        <span class="trend-text">Efectivo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="main-dashboard">
+    <!-- Columna izquierda -->
+    <div class="left-column">
+      <!-- Gráfico de citas semanales -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>📊 Citas Semanales</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="citasChart" #citasChart width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha -->
+    <div class="right-column">
+      <!-- Lista de actividad reciente -->
+      <div class="activity-card">
+        <div class="activity-header">
+          <h3>📋 Recientes</h3>
+          <div class="activity-actions">
+            <button class="btn-filter">Filtrar</button>
+            <button class="btn-print">Imprimir</button>
+          </div>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let cita of citasRecientes; trackBy: trackByCita">
+            <div class="activity-avatar">
+              <span>{{ getInitials(cita.cliente?.nombres || '', cita.cliente?.apellidos || '') }}</span>
+            </div>
+            <div class="activity-details">
+              <div class="activity-name">{{ cita.cliente?.nombres }} {{ cita.cliente?.apellidos }}</div>
+              <div class="activity-service">{{ cita.servicio?.nombre }}</div>
+              <div class="activity-time">{{ formatearFecha(cita.fechaCreacion || cita.fecha) }}</div>
+            </div>
+            <div class="activity-status">
+              <span class="status-badge" [class]="'status-' + getColorEstado(cita.estado)">
+                {{ cita.estado }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

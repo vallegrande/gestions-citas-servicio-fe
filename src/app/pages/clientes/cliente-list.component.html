@@ -1,0 +1,121 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">👥 Gestión de Clientes</h1>
+      <p class="page-subtitle">Administra los clientes del sistema</p>
+    </div>
+    <div class="header-actions">
+      <div class="filter-controls">
+        <label class="filter-toggle">
+          <input type="checkbox" [(ngModel)]="mostrarInactivos" (change)="aplicarFiltros()">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Mostrar Inactivos</span>
+        </label>
+      </div>
+      <button class="btn btn-primary" (click)="nuevoCliente()">
+        <span class="btn-icon">➕</span>
+        Nuevo Cliente
+      </button>
+    </div>
+  </div>
+  
+  <div class="content-card" *ngIf="!loading && !error">
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-number">{{ clientesFiltrados.length }}</span>
+        <span class="stat-label">{{ mostrarInactivos ? 'Inactivos Mostrados' : 'Activos Mostrados' }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ totalClientesActivos }}</span>
+        <span class="stat-label">Total Activos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ totalClientesInactivos }}</span>
+        <span class="stat-label">Total Inactivos</span>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Documento</th>
+            <th>Contacto</th>
+            <th>Estado</th>
+            <th class="actions-column">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cliente of clientesFiltrados; trackBy: trackByCliente" class="table-row">
+            <td class="cliente-id">{{ cliente.id }}</td>
+            <td class="client-info">
+              <div class="client-avatar">{{ getInitials(cliente.nombres, cliente.apellidos) }}</div>
+              <div class="client-details">
+                <div class="client-name">{{ cliente.nombres }} {{ cliente.apellidos }}</div>
+                <div class="client-meta">{{ cliente.email || 'Sin email' }}</div>
+              </div>
+            </td>
+            <td class="client-document">{{ cliente.documento }}</td>
+            <td class="client-contact">
+              <div class="contact-phone">📞 {{ cliente.telefono }}</div>
+              <div class="contact-address" *ngIf="cliente.direccion">📍 {{ cliente.direccion }}</div>
+            </td>
+            <td class="client-status">
+              <span class="status-badge" [ngClass]="getStatusClass(cliente.estado)">
+                {{ cliente.estado }}
+              </span>
+            </td>
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button class="btn-action view" (click)="verDetalles(cliente.id)" title="Ver detalles">
+                  👁️
+                </button>
+                <button class="btn-action edit" (click)="editarCliente(cliente.id)" title="Editar cliente" 
+                        *ngIf="isClienteActivo(cliente.estado)">
+                  ✏️
+                </button>
+                <button class="btn-action restore" (click)="restaurarCliente(cliente)" title="Restaurar cliente"
+                        *ngIf="isClienteInactivo(cliente.estado)">
+                  🔄
+                </button>
+                <button class="btn-action delete" (click)="eliminarCliente(cliente)" title="Eliminar cliente"
+                        *ngIf="isClienteActivo(cliente.estado)">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="clientesFiltrados.length === 0 && (totalClientesActivos > 0 || totalClientesInactivos > 0)">
+        <div class="empty-icon">🔍</div>
+        <h3>No hay clientes {{ mostrarInactivos ? 'inactivos' : 'activos' }}</h3>
+        <p>{{ mostrarInactivos ? 'No se encontraron clientes inactivos' : 'Todos los clientes están activos' }}</p>
+        <button class="btn btn-secondary" (click)="limpiarFiltros()">Ver Todos</button>
+      </div>
+
+      <!-- Estado vacío inicial -->
+      <div class="empty-state" *ngIf="totalClientesActivos === 0 && totalClientesInactivos === 0">
+        <div class="empty-icon">👥</div>
+        <h3>No hay clientes registrados</h3>
+        <p>Comienza registrando el primer cliente en el sistema</p>
+        <button class="btn btn-primary" (click)="nuevoCliente()">Registrar Primer Cliente</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando clientes...</p>
+  </div>
+  
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <button class="btn btn-primary" (click)="cargarClientes()">Reintentar</button>
+  </div>
+</div>

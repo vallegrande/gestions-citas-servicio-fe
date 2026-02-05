@@ -1,0 +1,81 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">📅 Detalle de Cita</h1>
+      <p class="page-subtitle">Visualiza los detalles de la cita</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="volver()">
+        <span class="btn-icon">←</span>
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando detalle de la cita...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <button class="btn btn-primary" (click)="cargarCita()">Reintentar</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content-container" *ngIf="!loading && !error && cita">
+    <!-- Información de la Cita -->
+    <div class="info-card">
+      <div class="card-header">
+        <h3>📋 Información de la Cita</h3>
+        <div class="status-badge" [ngClass]="'status-' + getEstadoInfo(cita.estado).color">
+          {{ getEstadoInfo(cita.estado).label }}
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">ID de Cita:</span>
+          <span class="info-value">#{{ cita.id }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Fecha:</span>
+          <span class="info-value">{{ formatearFecha(cita.fecha) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Hora de Inicio:</span>
+          <span class="info-value">{{ cita.horaInicio }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Hora de Fin:</span>
+          <span class="info-value">{{ cita.horaFin }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Cliente:</span>
+          <span class="info-value">{{ getClienteNombre() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Personal:</span>
+          <span class="info-value">{{ getPersonalNombre() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Servicio:</span>
+          <span class="info-value">{{ getServicioNombre() }}</span>
+        </div>
+        <div class="info-item" *ngIf="cita.observaciones">
+          <span class="info-label">Observaciones:</span>
+          <span class="info-value">{{ cita.observaciones }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Estado Actual:</span>
+          <span class="info-value" [style.color]="getEstadoInfo(cita.estado).color === 'success' ? 'green' : getEstadoInfo(cita.estado).color === 'danger' ? 'red' : getEstadoInfo(cita.estado).color === 'warning' ? 'orange' : 'blue'">
+            <strong>{{ getEstadoInfo(cita.estado).label }}</strong>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

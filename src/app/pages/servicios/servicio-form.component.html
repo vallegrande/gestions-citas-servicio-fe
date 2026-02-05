@@ -1,0 +1,188 @@
+<div class="servicio-form-page">
+  <!-- Header elegante -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <span class="icon-circle">{{ isEditing ? '✏️' : '➕' }}</span>
+      </div>
+      <div class="header-text">
+        <h1 class="page-title">{{ isEditing ? 'Editar Servicio' : 'Nuevo Servicio' }}</h1>
+        <p class="page-subtitle">{{ isEditing ? 'Actualiza la información del servicio' : 'Registra un nuevo servicio en el sistema' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario con diseño moderno -->
+  <div class="form-container">
+    <form [formGroup]="servicioForm" (ngSubmit)="onSubmit()" class="servicio-form">
+      
+      <!-- Sección: Información del Servicio -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">🛠️</span>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Información del Servicio</h3>
+            <p class="section-description">Datos básicos del servicio ofrecido</p>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label" for="nombre">
+              <span class="label-icon">📝</span>
+              <span class="label-text">Nombre del Servicio</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="nombre"
+              formControlName="nombre" 
+              class="form-control"
+              [class.is-invalid]="servicioForm.get('nombre')?.touched && servicioForm.get('nombre')?.invalid"
+              placeholder="Ej: Consulta General, Limpieza Dental, etc.">
+            <div class="invalid-feedback" *ngIf="servicioForm.get('nombre')?.touched && servicioForm.get('nombre')?.invalid">
+              <span class="error-icon">⚠️</span>
+              El nombre del servicio es obligatorio (mínimo 2 caracteres)
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label" for="descripcion">
+              <span class="label-icon">📄</span>
+              <span class="label-text">Descripción</span>
+              <span class="optional">(Opcional)</span>
+            </label>
+            <textarea 
+              id="descripcion"
+              formControlName="descripcion" 
+              class="form-control"
+              placeholder="Describe el servicio ofrecido..."
+              rows="3"></textarea>
+            <small class="form-hint">
+              <span class="hint-icon">💡</span>
+              Proporciona una breve descripción del servicio para mayor claridad
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Detalles del Servicio -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">⏱️</span>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Detalles del Servicio</h3>
+            <p class="section-description">Duración y precio del servicio</p>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="duracionMinutos">
+              <span class="label-icon">⏰</span>
+              <span class="label-text">Duración (minutos)</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="number" 
+              id="duracionMinutos"
+              formControlName="duracionMinutos" 
+              class="form-control"
+              [class.is-invalid]="servicioForm.get('duracionMinutos')?.touched && servicioForm.get('duracionMinutos')?.invalid"
+              placeholder="Ej: 30"
+              min="1">
+            <div class="invalid-feedback" *ngIf="servicioForm.get('duracionMinutos')?.touched && servicioForm.get('duracionMinutos')?.invalid">
+              <span class="error-icon">⚠️</span>
+              La duración es obligatoria y debe ser mayor a 0
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="precio">
+              <span class="label-icon">💰</span>
+              <span class="label-text">Precio</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="number" 
+              id="precio"
+              formControlName="precio" 
+              class="form-control"
+              [class.is-invalid]="servicioForm.get('precio')?.touched && servicioForm.get('precio')?.invalid"
+              placeholder="Ej: 50.00"
+              step="0.01"
+              min="0">
+            <div class="invalid-feedback" *ngIf="servicioForm.get('precio')?.touched && servicioForm.get('precio')?.invalid">
+              <span class="error-icon">⚠️</span>
+              El precio es obligatorio y debe ser mayor o igual a 0
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="isEditing">
+            <label class="form-label" for="estado">
+              <span class="label-icon">🔄</span>
+              <span class="label-text">Estado</span>
+              <span class="required">*</span>
+            </label>
+            <select 
+              id="estado"
+              formControlName="estado" 
+              class="form-control"
+              [class.is-invalid]="servicioForm.get('estado')?.touched && servicioForm.get('estado')?.invalid">
+              <option value="ACTIVO">Activo</option>
+              <option value="INACTIVO">Inactivo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de acción con diseño mejorado -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="saving || servicioForm.invalid">
+          <span class="btn-content">
+            <span class="btn-icon" *ngIf="saving">
+              <span class="spinner"></span>
+            </span>
+            <span class="btn-icon" *ngIf="!saving">{{ isEditing ? '💾' : '➕' }}</span>
+            <span class="btn-text">{{ saving ? 'Guardando...' : (isEditing ? 'Actualizar Servicio' : 'Crear Servicio') }}</span>
+          </span>
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="volver()"
+          [disabled]="saving">
+          <span class="btn-content">
+            <span class="btn-icon">↩️</span>
+            <span class="btn-text">Cancelar</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Mensaje de error con diseño mejorado -->
+      <div class="alert alert-danger" *ngIf="error">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <div class="alert-title">Error al guardar</div>
+          <div class="alert-message">{{ error }}</div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Estado de carga -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-content">
+      <div class="spinner-large"></div>
+      <p class="loading-text">{{ isEditing ? 'Cargando servicio...' : 'Preparando formulario...' }}</p>
+    </div>
+  </div>
+</div>

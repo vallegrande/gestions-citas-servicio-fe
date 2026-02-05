@@ -1,0 +1,115 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">👨‍⚕️ Gestión de Personal</h1>
+      <p class="page-subtitle">Administra el personal del sistema</p>
+    </div>
+    <div class="header-actions">
+      <div class="filter-controls">
+        <label class="filter-toggle">
+          <input type="checkbox" [(ngModel)]="mostrarInactivos" (change)="aplicarFiltros()">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Mostrar Inactivos</span>
+        </label>
+      </div>
+      <button class="btn btn-primary" (click)="nuevoPersonal()">
+        <span class="btn-icon">➕</span>
+        Nuevo Personal
+      </button>
+    </div>
+  </div>
+  
+  <div class="content-card" *ngIf="!loading && !error">
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-number">{{ personalFiltrados.length }}</span>
+        <span class="stat-label">{{ mostrarInactivos ? 'Inactivos Mostrados' : 'Activos Mostrados' }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ personalActivos }}</span>
+        <span class="stat-label">Total Activos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ personalInactivos }}</span>
+        <span class="stat-label">Total Inactivos</span>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Personal</th>
+            <th>Especialidad</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th class="actions-column">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let persona of personalFiltrados; trackBy: trackByPersonal" class="table-row">
+            <td class="personal-id">{{ persona.id }}</td>
+            <td class="personal-info">
+              <div class="personal-avatar">{{ getInitials(persona.nombres, persona.apellidos) }}</div>
+              <div class="personal-details">
+                <div class="personal-name">{{ persona.nombres }} {{ persona.apellidos }}</div>
+                <div class="personal-meta">{{ persona.especialidad }}</div>
+              </div>
+            </td>
+            <td class="personal-specialty">{{ persona.especialidad }}</td>
+            <td class="personal-contact">📞 {{ persona.telefono }}</td>
+            <td class="personal-status">
+              <span class="status-badge" [ngClass]="getStatusClass(persona.estado)">
+                {{ persona.estado }}
+              </span>
+            </td>
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button class="btn-action edit" (click)="editarPersonal(persona.id)" title="Editar personal"
+                        *ngIf="isPersonalActivo(persona.estado)">
+                  ✏️
+                </button>
+                <button class="btn-action restore" (click)="restaurarPersonal(persona)" title="Restaurar personal"
+                        *ngIf="isPersonalInactivo(persona.estado)">
+                  🔄
+                </button>
+                <button class="btn-action delete" (click)="eliminarPersonal(persona)" title="Eliminar personal"
+                        *ngIf="isPersonalActivo(persona.estado)">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="personalFiltrados.length === 0 && (personalActivos > 0 || personalInactivos > 0)">
+        <div class="empty-icon">🔍</div>
+        <h3>No hay personal {{ mostrarInactivos ? 'inactivo' : 'activo' }}</h3>
+        <p>{{ mostrarInactivos ? 'No se encontró personal inactivo' : 'Todo el personal está activo' }}</p>
+        <button class="btn btn-secondary" (click)="limpiarFiltros()">Ver Todos</button>
+      </div>
+
+      <!-- Estado vacío inicial -->
+      <div class="empty-state" *ngIf="personalActivos === 0 && personalInactivos === 0">
+        <div class="empty-icon">👨‍⚕️</div>
+        <h3>No hay personal registrado</h3>
+        <p>Comienza registrando el primer miembro del personal</p>
+        <button class="btn btn-primary" (click)="nuevoPersonal()">Registrar Primer Personal</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando personal...</p>
+  </div>
+  
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <button class="btn btn-primary" (click)="cargarPersonal()">Reintentar</button>
+  </div>
+</div>

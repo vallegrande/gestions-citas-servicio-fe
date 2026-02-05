@@ -1,0 +1,285 @@
+<div class="cita-form-page">
+  <!-- Header de la página -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">{{ isEditMode ? 'Editar Cita' : 'Nueva Cita' }}</h1>
+      <p class="page-subtitle">{{ isEditMode ? 'Modifica los datos de la cita' : 'Programa una nueva cita en el sistema' }}</p>
+    </div>
+  </div>
+
+  <!-- Formulario de cita -->
+  <div class="form-container">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="cita-form">
+      
+      <!-- Sección: Información del Cliente -->
+      <div class="form-section" *ngIf="!isEditMode">
+        <h3 class="section-title">
+          <span class="section-icon">👤</span>
+          Información del Cliente
+        </h3>
+        
+        <div class="form-group">
+          <label class="form-label" for="clienteId">
+            <span class="label-text">Cliente</span>
+            <span class="required">*</span>
+          </label>
+          <select 
+            id="clienteId" 
+            formControlName="clienteId" 
+            class="form-control"
+            [class.is-invalid]="form.get('clienteId')?.touched && form.get('clienteId')?.invalid">
+            <option value="">Seleccione un cliente</option>
+            <option *ngFor="let cliente of clientes" [value]="cliente.id">
+              {{ cliente.nombres }} {{ cliente.apellidos }} - {{ cliente.documento }}
+            </option>
+          </select>
+          <div class="loading-text" *ngIf="loadingClientes">Cargando clientes...</div>
+          <div class="invalid-feedback" *ngIf="form.get('clienteId')?.touched && form.get('clienteId')?.invalid">
+            Debe seleccionar un cliente
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de la cita en modo edición (solo lectura) -->
+      <div class="form-section" *ngIf="isEditMode">
+        <h3 class="section-title">
+          <span class="section-icon">📋</span>
+          Información de la Cita
+        </h3>
+        
+        <div class="loading-state" *ngIf="loading || !datosListos()">
+          <div class="spinner"></div>
+          <p>Cargando información de la cita...</p>
+        </div>
+        
+        <div class="info-grid" *ngIf="!loading && datosListos()">
+          <div class="info-item">
+            <label class="form-label">👤 Cliente:</label>
+            <div class="info-value">{{ getClienteNombre() }}</div>
+          </div>
+          <div class="info-item">
+            <label class="form-label">🛠️ Servicio:</label>
+            <div class="info-value">{{ getServicioNombre() }}</div>
+          </div>
+          <div class="info-item">
+            <label class="form-label">👨‍⚕️ Personal:</label>
+            <div class="info-value">{{ getPersonalNombre() }}</div>
+          </div>
+          <div class="info-item">
+            <label class="form-label">📅 Fecha:</label>
+            <div class="info-value">{{ formatearFecha() }}</div>
+          </div>
+          <div class="info-item">
+            <label class="form-label">🕐 Hora de Inicio:</label>
+            <div class="info-value">{{ formatearHora() }}</div>
+          </div>
+          <div class="info-item" *ngIf="form.get('observaciones')?.value">
+            <label class="form-label">📝 Observaciones:</label>
+            <div class="info-value">{{ form.get('observaciones')?.value }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Información del Servicio (solo para crear) -->
+      <div class="form-section" *ngIf="!isEditMode">
+        <h3 class="section-title">
+          <span class="section-icon">🛠️</span>
+          Información del Servicio
+        </h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="servicioId">
+              <span class="label-text">Servicio</span>
+              <span class="required">*</span>
+            </label>
+            <select 
+              id="servicioId" 
+              formControlName="servicioId" 
+              class="form-control"
+              [class.is-invalid]="form.get('servicioId')?.touched && form.get('servicioId')?.invalid"
+              (change)="onServicioChange()">
+              <option value="">Seleccione un servicio</option>
+              <option *ngFor="let servicio of servicios" [value]="servicio.id">
+                {{ servicio.nombre }} - {{ servicio.duracionMinutos }}min - ${{ servicio.precio }}
+              </option>
+            </select>
+            <div class="loading-text" *ngIf="loadingServicios">Cargando servicios...</div>
+            <div class="invalid-feedback" *ngIf="form.get('servicioId')?.touched && form.get('servicioId')?.invalid">
+              Debe seleccionar un servicio
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="personalId">
+              <span class="label-text">Personal</span>
+              <span class="required">*</span>
+            </label>
+            <select 
+              id="personalId" 
+              formControlName="personalId" 
+              class="form-control"
+              [class.is-invalid]="form.get('personalId')?.touched && form.get('personalId')?.invalid"
+              (change)="onPersonalOFechaChange()">
+              <option value="">Seleccione personal</option>
+              <option *ngFor="let persona of personal" [value]="persona.id">
+                {{ persona.nombres }} {{ persona.apellidos }} - {{ persona.especialidad }}
+              </option>
+            </select>
+            <div class="loading-text" *ngIf="loadingPersonal">Cargando personal...</div>
+            <div class="invalid-feedback" *ngIf="form.get('personalId')?.touched && form.get('personalId')?.invalid">
+              Debe seleccionar el personal que atenderá
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Fecha y Hora (solo para crear) -->
+      <div class="form-section" *ngIf="!isEditMode">
+        <h3 class="section-title">
+          <span class="section-icon">📅</span>
+          Fecha y Hora
+        </h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fecha">
+              <span class="label-text">Fecha</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="date" 
+              id="fecha"
+              formControlName="fecha" 
+              class="form-control"
+              [class.is-invalid]="form.get('fecha')?.touched && form.get('fecha')?.invalid"
+              [min]="getFechaMinima()"
+              (change)="onPersonalOFechaChange()">
+            <div class="invalid-feedback" *ngIf="form.get('fecha')?.touched && form.get('fecha')?.invalid">
+              Debe seleccionar una fecha válida
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="horaInicio">
+              <span class="label-text">Hora de Inicio</span>
+              <span class="required">*</span>
+            </label>
+            <select 
+              id="horaInicio"
+              formControlName="horaInicio" 
+              class="form-control"
+              [class.is-invalid]="form.get('horaInicio')?.touched && form.get('horaInicio')?.invalid"
+              (change)="onHoraInicioChange(); verificarDisponibilidad()">
+              <option value="">Seleccione hora</option>
+              <option 
+                *ngFor="let hora of getHorasDisponibles()" 
+                [value]="hora"
+                [disabled]="horaEstaOcupada(hora)"
+                [style.color]="horaEstaOcupada(hora) ? '#999' : 'inherit'"
+                [style.background]="horaEstaOcupada(hora) ? '#f5f5f5' : 'white'">
+                {{ hora }} {{ horaEstaOcupada(hora) ? '🔒 Ocupado' : '' }}
+              </option>
+            </select>
+            <div class="invalid-feedback" *ngIf="form.get('horaInicio')?.touched && form.get('horaInicio')?.invalid">
+              Debe seleccionar una hora de inicio
+            </div>
+            <small class="form-text text-muted" *ngIf="citasDelPersonalEnFecha.length > 0">
+              ℹ️ Las horas marcadas con 🔒 están ocupadas por citas PROGRAMADAS. Las citas ATENDIDAS o CANCELADAS no bloquean horarios.
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Estado (solo para editar) -->
+      <div class="form-section" *ngIf="isEditMode">
+        <h3 class="section-title">
+          <span class="section-icon">⚡</span>
+          Actualizar Cita
+        </h3>
+        
+        <div class="form-group">
+          <label class="form-label" for="estado">
+            <span class="label-text">Estado</span>
+            <span class="required">*</span>
+          </label>
+          <select 
+            id="estado" 
+            formControlName="estado" 
+            class="form-control"
+            [class.is-invalid]="form.get('estado')?.touched && form.get('estado')?.invalid">
+            <option value="">Seleccione un estado</option>
+            <option value="PROGRAMADA">Programada</option>
+            <option value="ATENDIDA">Atendida</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="form.get('estado')?.touched && form.get('estado')?.invalid">
+            Debe seleccionar un estado
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="observaciones-edit">
+            <span class="label-text">Observaciones</span>
+          </label>
+          <textarea 
+            id="observaciones-edit"
+            formControlName="observaciones" 
+            class="form-control"
+            rows="3"
+            placeholder="Actualice las observaciones de la cita..."></textarea>
+          <small class="form-text text-muted">
+            ℹ️ Solo se puede cambiar el estado y las observaciones de la cita.
+          </small>
+        </div>
+      </div>
+
+      <!-- Sección: Observaciones -->
+      <div class="form-section" *ngIf="!isEditMode">
+        <h3 class="section-title">
+          <span class="section-icon">📝</span>
+          Observaciones (Opcional)
+        </h3>
+        
+        <div class="form-group">
+          <label class="form-label" for="observaciones">
+            <span class="label-text">Observaciones adicionales</span>
+          </label>
+          <textarea 
+            id="observaciones"
+            formControlName="observaciones" 
+            class="form-control"
+            rows="3"
+            placeholder="Ingrese cualquier observación adicional sobre la cita..."></textarea>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="loading || (isEditMode && !form.get('estado')?.value) || (!isEditMode && form.invalid)">
+          <span class="btn-icon" *ngIf="loading">⏳</span>
+          <span class="btn-icon" *ngIf="!loading">💾</span>
+          {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar Cita' : 'Crear Cita') }}
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="cancelar()"
+          [disabled]="loading">
+          <span class="btn-icon">❌</span>
+          Cancelar
+        </button>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div class="alert alert-danger" *ngIf="error">
+        <span class="error-icon">⚠️</span>
+        {{ error }}
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,198 @@
+<div class="usuario-form">
+  <!-- Header de la página -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">{{ isEdit ? 'Editar Usuario Sistema' : 'Nuevo Usuario Sistema' }}</h1>
+      <p class="page-subtitle">{{ isEdit ? 'Modifica los datos del usuario del sistema' : 'Completa los datos para crear un nuevo usuario del sistema' }}</p>
+    </div>
+    <button class="btn btn-secondary" (click)="onCancel()">
+      <span class="btn-icon">←</span>
+      Volver
+    </button>
+  </div>
+
+  <!-- Estados de carga y error -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>{{ isEdit ? 'Cargando usuario...' : 'Guardando usuario...' }}</p>
+  </div>
+
+  <!-- Formulario -->
+  <div class="form-container" *ngIf="!loading">
+    <div class="card">
+      <div class="card-header">
+        <h3>Información del Usuario del Sistema</h3>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Error general -->
+          <div class="alert alert-danger" *ngIf="error">
+            {{ error }}
+          </div>
+
+          <div class="form-grid">
+            <!-- Username -->
+            <div class="form-group">
+              <label class="form-label" for="username">
+                Nombre de Usuario *
+              </label>
+              <input
+                type="text"
+                id="username"
+                class="form-control"
+                formControlName="username"
+                [class.is-invalid]="username?.invalid && username?.touched"
+                placeholder="Ingresa el nombre de usuario"
+              />
+              <div class="invalid-feedback" *ngIf="username?.invalid && username?.touched">
+                <div *ngIf="username?.errors?.['required']">El nombre de usuario es requerido</div>
+                <div *ngIf="username?.errors?.['minlength']">Debe tener al menos 3 caracteres</div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label class="form-label" for="email">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                id="email"
+                class="form-control"
+                formControlName="email"
+                [class.is-invalid]="email?.invalid && email?.touched"
+                placeholder="usuario@ejemplo.com"
+              />
+              <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+                <div *ngIf="email?.errors?.['email']">Ingresa un correo válido</div>
+              </div>
+            </div>
+
+            <!-- Nombre completo -->
+            <div class="form-group">
+              <label class="form-label" for="nombre">
+                Nombre Completo
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                class="form-control"
+                formControlName="nombre"
+                placeholder="Nombre completo del usuario"
+              />
+            </div>
+
+            <!-- Contraseña -->
+            <div class="form-group">
+              <label class="form-label" for="password">
+                Contraseña {{ isEdit ? '(dejar vacío para mantener actual)' : '*' }}
+              </label>
+              <input
+                type="password"
+                id="password"
+                class="form-control"
+                formControlName="password"
+                [class.is-invalid]="password?.invalid && password?.touched"
+                placeholder="Ingresa la contraseña"
+              />
+              <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
+                <div *ngIf="password?.errors?.['required']">La contraseña es requerida</div>
+                <div *ngIf="password?.errors?.['minlength']">Debe tener al menos 6 caracteres</div>
+              </div>
+            </div>
+
+            <!-- Rol -->
+            <div class="form-group">
+              <label class="form-label" for="rol">
+                Rol *
+              </label>
+              <select
+                id="rol"
+                class="form-control"
+                formControlName="rol"
+                [class.is-invalid]="rol?.invalid && rol?.touched"
+              >
+                <option value="STAFF">Staff</option>
+                <option value="ADMIN">Administrador</option>
+              </select>
+              <div class="invalid-feedback" *ngIf="rol?.invalid && rol?.touched">
+                <div *ngIf="rol?.errors?.['required']">El rol es requerido</div>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group">
+              <label class="form-label" for="estado">
+                Estado *
+              </label>
+              <select
+                id="estado"
+                class="form-control"
+                formControlName="estado"
+                [class.is-invalid]="estado?.invalid && estado?.touched"
+              >
+                <option value="ACTIVO">Activo</option>
+                <option value="INACTIVO">Inactivo</option>
+              </select>
+              <div class="invalid-feedback" *ngIf="estado?.invalid && estado?.touched">
+                <div *ngIf="estado?.errors?.['required']">El estado es requerido</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="onCancel()">
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-primary" 
+              [disabled]="form.invalid || loading"
+            >
+              <span class="btn-icon" *ngIf="loading">⏳</span>
+              <span class="btn-icon" *ngIf="!loading">{{ isEdit ? '💾' : '➕' }}</span>
+              {{ isEdit ? 'Actualizar Usuario' : 'Crear Usuario' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="info-panel">
+      <div class="card">
+        <div class="card-header">
+          <h3>Información</h3>
+        </div>
+        <div class="card-body">
+          <div class="info-item">
+            <strong>Roles disponibles:</strong>
+            <ul>
+              <li><strong>Staff:</strong> Puede gestionar citas, clientes, servicios y pagos</li>
+              <li><strong>Administrador:</strong> Acceso completo + gestión de usuarios y reportes</li>
+            </ul>
+          </div>
+          
+          <div class="info-item">
+            <strong>Estados:</strong>
+            <ul>
+              <li><strong>Activo:</strong> Usuario puede acceder al sistema</li>
+              <li><strong>Inactivo:</strong> Usuario bloqueado temporalmente</li>
+            </ul>
+          </div>
+
+          <div class="info-item">
+            <strong>Contraseña:</strong>
+            <p>{{ isEdit ? 'Deja el campo vacío para mantener la contraseña actual.' : 'Debe tener al menos 6 caracteres.' }}</p>
+          </div>
+
+          <div class="info-item">
+            <strong>Nota importante:</strong>
+            <p>Estos son usuarios del sistema (ADMIN/STAFF), no los clientes que reciben servicios.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

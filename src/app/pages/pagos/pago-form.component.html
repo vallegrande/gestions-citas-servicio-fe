@@ -1,0 +1,221 @@
+<div class="pago-form-page">
+  <!-- Header elegante -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <span class="icon-circle">✏️</span>
+      </div>
+      <div class="header-text">
+        <h1 class="page-title">Actualizar Pago</h1>
+        <p class="page-subtitle">Modifica el método de pago y el estado</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario con diseño moderno -->
+  <div class="form-container" *ngIf="pago && !loading">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="pago-form">
+      
+      <!-- Sección: Información de la Cita (Solo lectura) -->
+      <div class="form-section info-section">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">📋</span>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Información de la Cita</h3>
+            <p class="section-description">Datos de la cita asociada a este pago</p>
+          </div>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">👤</span>
+              Cliente
+            </div>
+            <div class="info-value">{{ getClienteNombre() }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">🛠️</span>
+              Servicio
+            </div>
+            <div class="info-value">{{ getServicioNombre() }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">📅</span>
+              Fecha de Cita
+            </div>
+            <div class="info-value">{{ getFechaCita() }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">💵</span>
+              Monto
+            </div>
+            <div class="info-value amount">S/ {{ getMonto() | number:'1.2-2' }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">
+              <span class="info-icon">📆</span>
+              Fecha de Registro
+            </div>
+            <div class="info-value">{{ getFechaPago() }}</div>
+          </div>
+        </div>
+
+        <div class="info-note">
+          <span class="note-icon">ℹ️</span>
+          <span class="note-text">Este pago se creó automáticamente al registrar la cita. Los datos de la cita y el monto no pueden modificarse.</span>
+        </div>
+      </div>
+
+      <!-- Sección: Actualizar Pago -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">💰</span>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Actualizar Información del Pago</h3>
+            <p class="section-description">Modifica el método de pago y el estado</p>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="metodoPago">
+              <span class="label-icon">💳</span>
+              <span class="label-text">Método de Pago</span>
+              <span class="required">*</span>
+            </label>
+            <select 
+              id="metodoPago"
+              formControlName="metodoPago" 
+              class="form-control"
+              [class.is-invalid]="form.get('metodoPago')?.touched && form.get('metodoPago')?.invalid">
+              <option value="">Seleccione método de pago</option>
+              <option *ngFor="let metodo of metodosPago" [value]="metodo.value">
+                {{ metodo.label }}
+              </option>
+            </select>
+            <div class="invalid-feedback" *ngIf="form.get('metodoPago')?.touched && form.get('metodoPago')?.invalid">
+              <span class="error-icon">⚠️</span>
+              Debe seleccionar un método de pago
+            </div>
+            <small class="form-hint">
+              <span class="hint-icon">💡</span>
+              Selecciona cómo se realizó o realizará el pago
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="estado">
+              <span class="label-icon">🔄</span>
+              <span class="label-text">Estado del Pago</span>
+              <span class="required">*</span>
+            </label>
+            <select 
+              id="estado"
+              formControlName="estado" 
+              class="form-control"
+              [class.is-invalid]="form.get('estado')?.touched && form.get('estado')?.invalid">
+              <option *ngFor="let estado of estadosPago" [value]="estado.value">
+                {{ estado.label }}
+              </option>
+            </select>
+            <div class="invalid-feedback" *ngIf="form.get('estado')?.touched && form.get('estado')?.invalid">
+              <span class="error-icon">⚠️</span>
+              Debe seleccionar un estado
+            </div>
+            <small class="form-hint">
+              <span class="hint-icon">💡</span>
+              <strong>PENDIENTE:</strong> Aún no pagado | <strong>PAGADO:</strong> Pago completado | <strong>REEMBOLSADO:</strong> Dinero devuelto
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Observaciones -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">📝</span>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Observaciones</h3>
+            <p class="section-description">Información adicional sobre el pago (opcional)</p>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="observaciones">
+            <span class="label-icon">💬</span>
+            <span class="label-text">Observaciones</span>
+            <span class="optional">(Opcional)</span>
+          </label>
+          <textarea 
+            id="observaciones"
+            formControlName="observaciones" 
+            class="form-control"
+            placeholder="Observaciones adicionales (opcional)"
+            rows="3"></textarea>
+          <small class="form-hint">
+            <span class="hint-icon">💡</span>
+            Puedes agregar notas o detalles adicionales sobre el pago
+          </small>
+        </div>
+      </div>
+
+      <!-- Botones de acción con diseño mejorado -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="loading || form.invalid">
+          <span class="btn-content">
+            <span class="btn-icon" *ngIf="loading">
+              <span class="spinner"></span>
+            </span>
+            <span class="btn-icon" *ngIf="!loading">💾</span>
+            <span class="btn-text">{{ loading ? 'Guardando...' : 'Actualizar Pago' }}</span>
+          </span>
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="cancelar()"
+          [disabled]="loading">
+          <span class="btn-content">
+            <span class="btn-icon">↩️</span>
+            <span class="btn-text">Cancelar</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Mensaje de error con diseño mejorado -->
+      <div class="alert alert-danger" *ngIf="error">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <div class="alert-title">Error al guardar</div>
+          <div class="alert-message">{{ error }}</div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Estado de carga -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-content">
+      <div class="spinner-large"></div>
+      <p class="loading-text">Cargando información del pago...</p>
+    </div>
+  </div>
+</div>

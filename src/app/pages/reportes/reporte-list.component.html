@@ -1,0 +1,153 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">📊 Reportes y Estadísticas</h1>
+      <p class="page-subtitle">Análisis de datos del sistema</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="filtrarFechas()">
+        <span class="btn-icon">📅</span>
+        Filtrar Fechas
+      </button>
+      <button class="btn btn-primary" (click)="exportarPDF()">
+        <span class="btn-icon">📄</span>
+        Exportar PDF
+      </button>
+    </div>
+  </div>
+  
+  <div class="reports-grid" *ngIf="!loading && !error">
+    <!-- Resumen General -->
+    <div class="report-card summary">
+      <h3 class="card-title">📈 Resumen General</h3>
+      <div class="summary-stats">
+        <div class="summary-item">
+          <span class="summary-number">{{ totalCitas }}</span>
+          <span class="summary-label">Total Citas</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-number">{{ totalIngresos | currency:'USD':'symbol':'1.0-0' }}</span>
+          <span class="summary-label">Ingresos Totales</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-number">{{ citasCompletadas }}</span>
+          <span class="summary-label">Citas Completadas</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-number">{{ tasaCompletacion }}%</span>
+          <span class="summary-label">Tasa Completación</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Citas por Estado -->
+    <div class="report-card">
+      <h3 class="card-title">📊 Citas por Estado</h3>
+      <div class="chart-container">
+        <div class="chart-item" *ngFor="let estado of estadosCitas">
+          <div class="chart-bar">
+            <div class="bar-fill" [style.width.%]="estado.porcentaje" [ngClass]="estado.clase"></div>
+          </div>
+          <div class="chart-label">
+            <span class="estado-name">{{ estado.nombre }}</span>
+            <span class="estado-count">{{ estado.cantidad }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ingresos por Mes -->
+    <div class="report-card">
+      <h3 class="card-title">💰 Ingresos por Mes</h3>
+      <div class="monthly-chart">
+        <div class="month-item" *ngFor="let mes of ingresosPorMes">
+          <div class="month-bar">
+            <div class="month-fill" [style.height.%]="mes.porcentaje"></div>
+          </div>
+          <div class="month-label">{{ mes.nombre }}</div>
+          <div class="month-amount">{{ mes.monto | currency:'USD':'symbol':'1.0-0' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Servicios -->
+    <div class="report-card">
+      <h3 class="card-title">🏆 Servicios Más Solicitados</h3>
+      <div class="top-services">
+        <div class="service-item" *ngFor="let servicio of topServicios; let i = index">
+          <div class="service-rank">{{ i + 1 }}</div>
+          <div class="service-info">
+            <div class="service-name">{{ servicio.nombre }}</div>
+            <div class="service-stats">{{ servicio.cantidad }} citas</div>
+          </div>
+          <div class="service-revenue">{{ servicio.ingresos | currency:'USD':'symbol':'1.0-0' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Adicionales -->
+    <div class="report-card">
+      <h3 class="card-title">📈 Métricas del Período</h3>
+      <div class="metrics-grid">
+        <div class="metric-item">
+          <div class="metric-icon">👥</div>
+          <div class="metric-info">
+            <div class="metric-value">{{ promedioClientesPorDia }}</div>
+            <div class="metric-label">Clientes/Día</div>
+          </div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-icon">⏱️</div>
+          <div class="metric-info">
+            <div class="metric-value">{{ tiempoPromedioAtencion }}min</div>
+            <div class="metric-label">Tiempo Promedio</div>
+          </div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-icon">💵</div>
+          <div class="metric-info">
+            <div class="metric-value">{{ ingresoPromedioPorCita | currency:'USD':'symbol':'1.0-0' }}</div>
+            <div class="metric-label">Ingreso/Cita</div>
+          </div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-icon">📅</div>
+          <div class="metric-info">
+            <div class="metric-value">{{ diasConCitas }}</div>
+            <div class="metric-label">Días Activos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personal Más Activo -->
+    <div class="report-card">
+      <h3 class="card-title">👨‍⚕️ Personal Más Activo</h3>
+      <div class="staff-ranking">
+        <div class="staff-item" *ngFor="let personal of topPersonal; let i = index">
+          <div class="staff-position">{{ i + 1 }}</div>
+          <div class="staff-avatar">{{ personal.iniciales }}</div>
+          <div class="staff-details">
+            <div class="staff-name">{{ personal.nombre }}</div>
+            <div class="staff-specialty">{{ personal.especialidad }}</div>
+          </div>
+          <div class="staff-stats">
+            <div class="staff-citas">{{ personal.citas }} citas</div>
+            <div class="staff-rating">⭐ {{ personal.rating }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Generando reportes...</p>
+  </div>
+  
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <button class="btn btn-primary" (click)="cargarReportes()">Reintentar</button>
+  </div>
+</div>

@@ -1,0 +1,172 @@
+<div class="cliente-detalle-page">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="btn-back" (click)="volver()">
+      <span class="icon">←</span>
+      <span>Volver</span>
+    </button>
+    <h1 class="page-title">
+      <span class="icon">👤</span>
+      Detalle del Cliente
+    </h1>
+    <button class="btn-edit" (click)="editarCliente()" *ngIf="cliente">
+      <span class="icon">✏️</span>
+      <span>Editar</span>
+    </button>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando información del cliente...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-container" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button class="btn-primary" (click)="volver()">Volver a la lista</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content" *ngIf="!loading && !error && cliente">
+    <!-- Información del Cliente -->
+    <div class="info-card">
+      <div class="card-header">
+        <div class="header-icon">
+          <span>📋</span>
+        </div>
+        <div class="header-text">
+          <h2>Información Personal</h2>
+          <p>Datos del cliente registrado</p>
+        </div>
+        <div class="estado-badge" [class.activo]="cliente.estado === 'ACTIVO'" [class.inactivo]="cliente.estado === 'INACTIVO'">
+          {{ cliente.estado }}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">
+              <span class="icon">👤</span>
+              Nombre Completo
+            </div>
+            <div class="info-value">{{ cliente.nombres }} {{ cliente.apellidos }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">
+              <span class="icon">🆔</span>
+              Documento
+            </div>
+            <div class="info-value">{{ cliente.documento }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">
+              <span class="icon">📱</span>
+              Teléfono
+            </div>
+            <div class="info-value">{{ cliente.telefono }}</div>
+          </div>
+          <div class="info-item" *ngIf="cliente.email">
+            <div class="info-label">
+              <span class="icon">✉️</span>
+              Correo Electrónico
+            </div>
+            <div class="info-value">{{ cliente.email }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas de Citas -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon total">📊</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalCitas }}</div>
+          <div class="stat-label">Total de Citas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon programada">📅</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ citasProgramadas }}</div>
+          <div class="stat-label">Programadas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon atendida">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ citasAtendidas }}</div>
+          <div class="stat-label">Atendidas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon cancelada">❌</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ citasCanceladas }}</div>
+          <div class="stat-label">Canceladas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial de Citas -->
+    <div class="historial-card">
+      <div class="card-header">
+        <div class="header-icon">
+          <span>📅</span>
+        </div>
+        <div class="header-text">
+          <h2>Historial de Citas</h2>
+          <p>Todas las citas del cliente</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Loading citas -->
+        <div class="loading-citas" *ngIf="loadingCitas">
+          <div class="spinner-small"></div>
+          <p>Cargando historial de citas...</p>
+        </div>
+
+        <!-- Sin citas -->
+        <div class="empty-state" *ngIf="!loadingCitas && citas.length === 0">
+          <div class="empty-icon">📭</div>
+          <h3>Sin citas registradas</h3>
+          <p>Este cliente aún no tiene citas programadas</p>
+        </div>
+
+        <!-- Lista de citas -->
+        <div class="citas-list" *ngIf="!loadingCitas && citas.length > 0">
+          <div class="cita-item" *ngFor="let cita of citas" (click)="verCita(cita.id)">
+            <div class="cita-fecha">
+              <div class="fecha-dia">{{ formatearFechaCorta(cita.fecha) }}</div>
+              <div class="fecha-hora">{{ cita.horaInicio }}</div>
+            </div>
+            <div class="cita-info">
+              <div class="cita-servicio">
+                <span class="icon">🛠️</span>
+                {{ cita.servicio?.nombre || 'Servicio no disponible' }}
+              </div>
+              <div class="cita-personal">
+                <span class="icon">👨‍⚕️</span>
+                {{ cita.personal?.nombres }} {{ cita.personal?.apellidos }}
+              </div>
+              <div class="cita-observaciones" *ngIf="cita.observaciones">
+                <span class="icon">📝</span>
+                {{ cita.observaciones }}
+              </div>
+            </div>
+            <div class="cita-estado">
+              <span class="badge" [ngClass]="getEstadoBadgeClass(cita.estado)">
+                {{ cita.estado }}
+              </span>
+            </div>
+            <div class="cita-action">
+              <span class="icon-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,8 +6,42 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+    }
+    .test-message {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 20px;
+    }
+  </style>
 </head>
 <body>
-  <app-root></app-root>
+  
+  <app-root>
+    <div class="test-message">
+      <h2>⏳ Cargando Angular...</h2>
+      <p>Si este mensaje no desaparece, hay un problema con Angular</p>
+    </div>
+  </app-root>
+  
+  <script>
+    console.log('✅ HTML cargado correctamente');
+    setTimeout(() => {
+      console.log('⏰ Verificando si Angular se cargó...');
+      const appRoot = document.querySelector('app-root');
+      if (appRoot && appRoot.innerHTML.includes('Cargando Angular')) {
+        console.error('❌ Angular no se cargó correctamente');
+      } else {
+        console.log('✅ Angular se cargó correctamente');
+      }
+    }, 3000);
+  </script>
 </body>
 </html>

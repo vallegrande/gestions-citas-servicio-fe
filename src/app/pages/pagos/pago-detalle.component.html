@@ -1,0 +1,141 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">💰 Detalle de Pago</h1>
+      <p class="page-subtitle">Información completa del pago</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="editarPago()" *ngIf="!loading && pago">
+        <span class="btn-icon">✏️</span>
+        Editar Estado
+      </button>
+      <button class="btn btn-secondary" (click)="volver()">
+        <span class="btn-icon">←</span>
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando detalle del pago...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <button class="btn btn-primary" (click)="cargarPago()">Reintentar</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content-container" *ngIf="!loading && !error && pago">
+    
+    <!-- Información Principal del Pago -->
+    <div class="info-card main-card">
+      <div class="card-header">
+        <h3>💳 Información del Pago</h3>
+        <div class="status-badge" [ngClass]="'status-' + getEstadoInfo(pago.estado).color">
+          <span class="status-icon">{{ getEstadoInfo(pago.estado).icon }}</span>
+          {{ getEstadoInfo(pago.estado).label }}
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item highlight">
+          <span class="info-label">ID de Pago:</span>
+          <span class="info-value">#{{ pago.id }}</span>
+        </div>
+        <div class="info-item highlight">
+          <span class="info-label">Monto:</span>
+          <span class="info-value amount">{{ formatearMonto(pago.monto) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Método de Pago:</span>
+          <span class="info-value">
+            <span class="method-icon">{{ getMetodoIcon(pago.metodoPago) }}</span>
+            {{ pago.metodoPago }}
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Fecha de Pago:</span>
+          <span class="info-value">{{ formatearFecha(pago.fechaPago) }}</span>
+        </div>
+        <div class="info-item" *ngIf="pago.observaciones">
+          <span class="info-label">Observaciones:</span>
+          <span class="info-value">{{ pago.observaciones }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información de la Cita Asociada -->
+    <div class="info-card">
+      <div class="card-header">
+        <h3>📅 Cita Asociada</h3>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">ID de Cita:</span>
+          <span class="info-value">#{{ pago.cita.id || 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Cliente:</span>
+          <span class="info-value">{{ getClienteNombre() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Servicio:</span>
+          <span class="info-value">{{ getServicioNombre() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Estado de Cita:</span>
+          <span class="info-value">{{ pago.cita.estado || 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones Disponibles -->
+    <div class="actions-card">
+      <div class="card-header">
+        <h3>⚡ Acciones Disponibles</h3>
+      </div>
+      
+      <div class="action-buttons-grid">
+        <button class="action-btn edit" (click)="editarPago()">
+          <span class="action-icon">✏️</span>
+          <div class="action-content">
+            <span class="action-title">Editar Estado</span>
+            <span class="action-desc">Cambiar el estado del pago</span>
+          </div>
+        </button>
+
+        <button class="action-btn print" (click)="imprimirRecibo()">
+          <span class="action-icon">🖨️</span>
+          <div class="action-content">
+            <span class="action-title">Imprimir Recibo</span>
+            <span class="action-desc">Generar recibo del pago</span>
+          </div>
+        </button>
+
+        <button class="action-btn refund" (click)="reembolsarPago()" 
+                *ngIf="isPagoReembolsable()">
+          <span class="action-icon">💸</span>
+          <div class="action-content">
+            <span class="action-title">Reembolsar</span>
+            <span class="action-desc">Procesar reembolso</span>
+          </div>
+        </button>
+
+        <button class="action-btn back" (click)="volver()">
+          <span class="action-icon">←</span>
+          <div class="action-content">
+            <span class="action-title">Volver</span>
+            <span class="action-desc">Regresar a la lista</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

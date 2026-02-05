@@ -1,0 +1,186 @@
+<div class="citas-page">
+  <!-- Header de la página -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Gestión de Citas</h1>
+      <p class="page-subtitle">Administra las citas del sistema</p>
+    </div>
+    <div class="header-actions">
+      <!-- Filtros con botones -->
+      <div class="filter-buttons">
+        <button 
+          class="filter-btn todas"
+          [class.active]="filtroEstado === 'TODAS'"
+          (click)="cambiarFiltro('TODAS')">
+          📋 Todas
+        </button>
+        <button 
+          class="filter-btn programada"
+          [class.active]="filtroEstado === 'PROGRAMADA'"
+          (click)="cambiarFiltro('PROGRAMADA')">
+          📅 Programadas
+        </button>
+        <button 
+          class="filter-btn atendida"
+          [class.active]="filtroEstado === 'ATENDIDA'"
+          (click)="cambiarFiltro('ATENDIDA')">
+          ✅ Atendidas
+        </button>
+        <button 
+          class="filter-btn cancelada"
+          [class.active]="filtroEstado === 'CANCELADA'"
+          (click)="cambiarFiltro('CANCELADA')">
+          ❌ Canceladas
+        </button>
+      </div>
+      
+      <a routerLink="/citas/nueva" class="btn btn-primary">
+        <span class="btn-icon">➕</span>
+        Nueva Cita
+      </a>
+    </div>
+  </div>
+
+  <!-- Estados de carga -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando citas...</p>
+  </div>
+
+  <!-- Estado de error -->
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <div class="error-actions">
+      <button class="btn btn-primary" (click)="cargar()">
+        <span class="btn-icon">🔄</span>
+        Reintentar
+      </button>
+      <button class="btn btn-secondary" (click)="irALogin()">
+        <span class="btn-icon">🔐</span>
+        Ir a Login
+      </button>
+    </div>
+  </div>
+
+  <!-- Container de citas -->
+  <div class="citas-container" *ngIf="!loading && !error">
+    <!-- Estadísticas rápidas -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-number">{{ getCitasPorEstado('TODAS').length }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ getCitasPorEstado('PROGRAMADA').length }}</div>
+        <div class="stat-label">Programadas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ getCitasPorEstado('ATENDIDA').length }}</div>
+        <div class="stat-label">Atendidas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ getCitasPorEstado('CANCELADA').length }}</div>
+        <div class="stat-label">Canceladas</div>
+      </div>
+    </div>
+
+    <!-- Tabla ordenada -->
+    <div class="table-container" *ngIf="citasFiltradas.length > 0">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Servicio</th>
+            <th>Personal</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="table-row" *ngFor="let cita of citasFiltradas; trackBy: trackByCita">
+            <td class="cita-id">#{{ cita.id }}</td>
+            
+            <td class="client-info">
+              <div class="client-avatar">
+                {{ getInitials(getClienteNombres(cita), getClienteApellidos(cita)) }}
+              </div>
+              <div class="client-details">
+                <div class="client-name">
+                  {{ getClienteNombres(cita) }} {{ getClienteApellidos(cita) }}
+                </div>
+                <div class="client-meta">
+                  {{ getClienteDocumento(cita) }}
+                </div>
+              </div>
+            </td>
+            
+            <td class="service-info">
+              <div class="service-name">{{ getServicioNombre(cita) }}</div>
+              <div class="service-duration">{{ getServicioDuracion(cita) }} min</div>
+            </td>
+            
+            <td class="staff-info">
+              <div class="staff-name">{{ getPersonalNombres(cita) }} {{ getPersonalApellidos(cita) }}</div>
+              <div class="staff-specialty">{{ getPersonalEspecialidad(cita) }}</div>
+            </td>
+            
+            <td class="cita-date">
+              {{ formatearFecha(cita.fecha) }}
+            </td>
+            
+            <td class="time-range">
+              <span>{{ cita.horaInicio }}</span>
+              <span class="time-separator">-</span>
+              <span>{{ cita.horaFin }}</span>
+            </td>
+            
+            <td>
+              <span class="status-badge" [ngClass]="getColorEstado(cita.estado)">
+                {{ cita.estado }}
+              </span>
+            </td>
+            
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button 
+                  class="btn-action view" 
+                  (click)="verDetalle(cita.id)"
+                  title="Ver detalle">
+                  👁️ Ver
+                </button>
+                <button 
+                  class="btn-action edit" 
+                  (click)="editarCita(cita.id)"
+                  title="Editar cita">
+                  ✏️ Editar
+                </button>
+                <button 
+                  class="btn-action cancel" 
+                  (click)="cancelarCita(cita.id)"
+                  *ngIf="cita.estado !== 'CANCELADA'"
+                  title="Cancelar cita">
+                  🚫
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="citasFiltradas.length === 0">
+      <div class="empty-icon">📅</div>
+      <h3>No hay citas {{ filtroEstado === 'TODAS' ? '' : filtroEstado.toLowerCase() }}</h3>
+      <p>No se encontraron citas en el sistema.</p>
+      <a routerLink="/citas/nueva" class="btn btn-primary">
+        <span class="btn-icon">➕</span>
+        Crear Primera Cita
+      </a>
+    </div>
+  </div>
+</div>

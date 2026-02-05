@@ -1,0 +1,185 @@
+<div class="cliente-form-page">
+  <!-- Header elegante con gradiente -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <span class="icon-circle">{{ isEditing ? '✏️' : '➕' }}</span>
+      </div>
+      <div class="header-text">
+        <h1 class="page-title">{{ isEditing ? 'Editar Cliente' : 'Nuevo Cliente' }}</h1>
+        <p class="page-subtitle">{{ isEditing ? 'Actualiza la información del cliente' : 'Registra un nuevo cliente en el sistema' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario con diseño moderno -->
+  <div class="form-container">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="cliente-form">
+      
+      <!-- Sección: Información Personal -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">👤</span>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Información Personal</h3>
+            <p class="section-description">Datos básicos de identificación del cliente</p>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="nombres">
+              <span class="label-icon">📝</span>
+              <span class="label-text">Nombres</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="nombres"
+              formControlName="nombres" 
+              class="form-control"
+              [class.is-invalid]="form.get('nombres')?.touched && form.get('nombres')?.invalid"
+              placeholder="Ingrese los nombres del cliente">
+            <div class="invalid-feedback" *ngIf="form.get('nombres')?.touched && form.get('nombres')?.invalid">
+              <span class="error-icon">⚠️</span>
+              Los nombres son obligatorios (mínimo 2 caracteres)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="apellidos">
+              <span class="label-icon">📝</span>
+              <span class="label-text">Apellidos</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="apellidos"
+              formControlName="apellidos" 
+              class="form-control"
+              [class.is-invalid]="form.get('apellidos')?.touched && form.get('apellidos')?.invalid"
+              placeholder="Ingrese los apellidos del cliente">
+            <div class="invalid-feedback" *ngIf="form.get('apellidos')?.touched && form.get('apellidos')?.invalid">
+              <span class="error-icon">⚠️</span>
+              Los apellidos son obligatorios (mínimo 2 caracteres)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="documento">
+              <span class="label-icon">🆔</span>
+              <span class="label-text">Documento de Identidad</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="documento"
+              formControlName="documento" 
+              class="form-control"
+              [class.is-invalid]="form.get('documento')?.touched && form.get('documento')?.invalid"
+              placeholder="Ej: 12345678"
+              maxlength="12">
+            <div class="invalid-feedback" *ngIf="form.get('documento')?.touched && form.get('documento')?.invalid">
+              <span class="error-icon">⚠️</span>
+              El documento es obligatorio (8-12 caracteres)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="telefono">
+              <span class="label-icon">📱</span>
+              <span class="label-text">Teléfono</span>
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="tel" 
+              id="telefono"
+              formControlName="telefono" 
+              class="form-control"
+              [class.is-invalid]="form.get('telefono')?.touched && form.get('telefono')?.invalid"
+              placeholder="Ej: 987654321"
+              maxlength="9">
+            <div class="invalid-feedback" *ngIf="form.get('telefono')?.touched && form.get('telefono')?.invalid">
+              <span class="error-icon">⚠️</span>
+              El teléfono es obligatorio (9 dígitos)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Información de Contacto -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">📧</span>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Información de Contacto</h3>
+            <p class="section-description">Datos adicionales para comunicación (opcional)</p>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="email">
+            <span class="label-icon">✉️</span>
+            <span class="label-text">Correo Electrónico</span>
+            <span class="optional">(Opcional)</span>
+          </label>
+          <input 
+            type="email" 
+            id="email"
+            formControlName="email" 
+            class="form-control"
+            [class.is-invalid]="form.get('email')?.touched && form.get('email')?.invalid"
+            placeholder="ejemplo@correo.com">
+          <div class="invalid-feedback" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+            <span class="error-icon">⚠️</span>
+            Ingrese un correo electrónico válido
+          </div>
+          <small class="form-hint">
+            <span class="hint-icon">💡</span>
+            El correo electrónico es opcional pero recomendado para enviar notificaciones
+          </small>
+        </div>
+      </div>
+
+      <!-- Botones de acción con diseño mejorado -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="loading || form.invalid">
+          <span class="btn-content">
+            <span class="btn-icon" *ngIf="loading">
+              <span class="spinner"></span>
+            </span>
+            <span class="btn-icon" *ngIf="!loading">{{ isEditing ? '💾' : '➕' }}</span>
+            <span class="btn-text">{{ loading ? 'Guardando...' : (isEditing ? 'Actualizar Cliente' : 'Crear Cliente') }}</span>
+          </span>
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="cancelar()"
+          [disabled]="loading">
+          <span class="btn-content">
+            <span class="btn-icon">↩️</span>
+            <span class="btn-text">Cancelar</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Mensaje de error con diseño mejorado -->
+      <div class="alert alert-danger" *ngIf="error">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <div class="alert-title">Error al guardar</div>
+          <div class="alert-message">{{ error }}</div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

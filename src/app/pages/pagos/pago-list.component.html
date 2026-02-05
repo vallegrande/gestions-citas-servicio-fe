@@ -1,0 +1,130 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">💰 Gestión de Pagos</h1>
+      <p class="page-subtitle">Administra los pagos del sistema</p>
+    </div>
+  </div>
+  
+  <div class="content-card" *ngIf="!loading && !error">
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-number">{{ pagos.length }}</span>
+        <span class="stat-label">Total Pagos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ totalIngresos | currency:'USD':'symbol':'1.0-0' }}</span>
+        <span class="stat-label">Total Ingresos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ pagosHoy }}</span>
+        <span class="stat-label">Pagos Hoy</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ ingresosHoy | currency:'USD':'symbol':'1.0-0' }}</span>
+        <span class="stat-label">Ingresos Hoy</span>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Servicio</th>
+            <th>Monto</th>
+            <th>Método</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th class="actions-column">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pago of pagos; trackBy: trackByPago" class="table-row">
+            <td class="pago-id">{{ pago.id }}</td>
+            <td class="pago-client">
+              <div class="client-info">
+                <div class="client-avatar">💰</div>
+                <div class="client-details">
+                  <div class="client-name">{{ getClienteNombre(pago) }}</div>
+                  <div class="client-meta">Cita #{{ pago.cita.id || pago.cita_id || 'N/A' }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="pago-service">
+              <div class="service-name">{{ getServicioNombre(pago) }}</div>
+            </td>
+            <td class="pago-amount">
+              <span class="amount-badge">{{ pago.monto | currency:'USD':'symbol':'1.2-2' }}</span>
+            </td>
+            <td class="pago-method">
+              <span class="method-badge" [ngClass]="getMethodClass(pago.metodoPago)">
+                {{ pago.metodoPago }}
+              </span>
+            </td>
+            <td class="pago-date">{{ formatearFecha(pago.fechaPago) }}</td>
+            <td class="pago-status">
+              <span class="status-badge" [ngClass]="getStatusClass(pago.estado)">
+                {{ pago.estado }}
+              </span>
+            </td>
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button class="btn-action view" (click)="verDetalles(pago.id)" title="Ver detalles">
+                  👁️
+                </button>
+                <button class="btn-action edit" (click)="editarPago(pago.id)" title="Editar estado">
+                  ✏️
+                </button>
+                <button class="btn-action print" (click)="imprimirRecibo(pago)" title="Imprimir recibo">
+                  🖨️
+                </button>
+                <button class="btn-action refund" (click)="reembolsarPago(pago)" title="Reembolsar pago"
+                        *ngIf="pago.estado === 'PAGADO'">
+                  💸
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="pagos.length === 0">
+        <div class="empty-icon">💰</div>
+        <h3>No hay pagos registrados</h3>
+        <p>Los pagos aparecerán aquí cuando se registren</p>
+        <div style="margin-top: 20px;">
+          <button class="btn btn-primary" (click)="nuevoPago()">Registrar Primer Pago</button>
+          <button class="btn btn-secondary" (click)="cargarPagos()" style="margin-left: 10px;">🔄 Recargar</button>
+        </div>
+        
+        <!-- Debug info -->
+        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: left;">
+          <strong>🔧 Debug Info:</strong><br>
+          <small>
+            <strong>Loading:</strong> {{ loading }}<br>
+            <strong>Error:</strong> {{ error || 'Ninguno' }}<br>
+            <strong>Pagos array length:</strong> {{ pagos.length }}<br>
+            <strong>API URL:</strong> http://localhost:8080/api/pagos
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando pagos...</p>
+  </div>
+  
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <div class="error-actions">
+      <button class="btn btn-primary" (click)="cargarPagos()">Reintentar</button>
+      <button class="btn btn-secondary" (click)="limpiarCacheYRecargar()">Limpiar Caché</button>
+    </div>
+  </div>
+</div>

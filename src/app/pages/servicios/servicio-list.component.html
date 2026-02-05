@@ -1,0 +1,127 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">🛠️ Gestión de Servicios</h1>
+      <p class="page-subtitle">Administra los servicios del sistema</p>
+    </div>
+    <div class="header-actions">
+      <div class="filter-controls">
+        <label class="filter-toggle">
+          <input type="checkbox" [(ngModel)]="mostrarInactivos" (change)="aplicarFiltros()">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Mostrar Inactivos</span>
+        </label>
+      </div>
+      <button class="btn btn-primary" (click)="nuevoServicio()">
+        <span class="btn-icon">➕</span>
+        Nuevo Servicio
+      </button>
+    </div>
+  </div>
+  
+  <div class="content-card" *ngIf="!loading && !error">
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-number">{{ serviciosFiltrados.length }}</span>
+        <span class="stat-label">{{ mostrarInactivos ? 'Inactivos Mostrados' : 'Activos Mostrados' }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ serviciosActivos }}</span>
+        <span class="stat-label">Total Activos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ serviciosInactivos }}</span>
+        <span class="stat-label">Total Inactivos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ promedioPrecios | currency:'USD':'symbol':'1.0-0' }}</span>
+        <span class="stat-label">Precio Promedio</span>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Servicio</th>
+            <th>Descripción</th>
+            <th>Duración</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th class="actions-column">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let servicio of serviciosFiltrados; trackBy: trackByServicio" class="table-row">
+            <td class="servicio-id">{{ servicio.id }}</td>
+            <td class="servicio-info">
+              <div class="servicio-icon">🛠️</div>
+              <div class="servicio-details">
+                <div class="servicio-name">{{ servicio.nombre }}</div>
+                <div class="servicio-meta">ID: {{ servicio.id }}</div>
+              </div>
+            </td>
+            <td class="servicio-description">
+              <div class="description-text">{{ servicio.descripcion || 'Sin descripción' }}</div>
+            </td>
+            <td class="servicio-duration">
+              <span class="duration-badge">{{ servicio.duracionMinutos }} min</span>
+            </td>
+            <td class="servicio-price">
+              <span class="price-badge">{{ servicio.precio | currency:'USD':'symbol':'1.2-2' }}</span>
+            </td>
+            <td class="servicio-status">
+              <span class="status-badge" [ngClass]="getStatusClass(servicio.estado)">
+                {{ servicio.estado }}
+              </span>
+            </td>
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button class="btn-action edit" (click)="editarServicio(servicio.id)" title="Editar servicio"
+                        *ngIf="isServicioActivo(servicio.estado)">
+                  ✏️
+                </button>
+                <button class="btn-action restore" (click)="restaurarServicio(servicio)" title="Restaurar servicio"
+                        *ngIf="isServicioInactivo(servicio.estado)">
+                  🔄
+                </button>
+                <button class="btn-action delete" (click)="eliminarServicio(servicio)" title="Eliminar servicio"
+                        *ngIf="isServicioActivo(servicio.estado)">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="serviciosFiltrados.length === 0 && (serviciosActivos > 0 || serviciosInactivos > 0)">
+        <div class="empty-icon">🔍</div>
+        <h3>No hay servicios {{ mostrarInactivos ? 'inactivos' : 'activos' }}</h3>
+        <p>{{ mostrarInactivos ? 'No se encontraron servicios inactivos' : 'Todos los servicios están activos' }}</p>
+        <button class="btn btn-secondary" (click)="limpiarFiltros()">Ver Todos</button>
+      </div>
+
+      <!-- Estado vacío inicial -->
+      <div class="empty-state" *ngIf="serviciosActivos === 0 && serviciosInactivos === 0">
+        <div class="empty-icon">🛠️</div>
+        <h3>No hay servicios registrados</h3>
+        <p>Comienza registrando el primer servicio en el sistema</p>
+        <button class="btn btn-primary" (click)="nuevoServicio()">Registrar Primer Servicio</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando servicios...</p>
+  </div>
+  
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ error }}</p>
+    <button class="btn btn-primary" (click)="cargarServicios()">Reintentar</button>
+  </div>
+</div>
