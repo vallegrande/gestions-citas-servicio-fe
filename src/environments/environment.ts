@@ -1,3 +1,3 @@
 export const environment = {
-    api:'http://localhost:8080/api',
+    api:'https://gestion-citas-servicios-be.onrender.com/api',
 };
