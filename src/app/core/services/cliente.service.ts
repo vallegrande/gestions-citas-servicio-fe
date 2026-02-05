@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { tap, shareReplay } from 'rxjs/operators';
 
 import { Cliente } from '../../models/cliente.model';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'

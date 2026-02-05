@@ -4,12 +4,12 @@ import { Observable } from 'rxjs';
 
 import { Estado } from '../../models/estado.model';
 import { AuthService } from './auth.service';
-
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class EstadoService {
-  private readonly baseUrl = 'http://localhost:8080/estados';
+  private readonly baseUrl = `${environment.api}/estados`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { tap, catchError, shareReplay } from 'rxjs/operators';
 
 import { Cita } from '../../models/cita.model';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
